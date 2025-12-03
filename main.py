@@ -1,31 +1,52 @@
-
-
+from collections import deque
 
 def shortest_path(rooms, doors, start, goal):
     """
     Compute one shortest path between start and goal in an undirected graph.
-
-    rooms: list of room name strings.
-    doors: list of (a, b) pairs, each pair is an undirected door between rooms a and b.
-    start: start room name.
-    goal: goal room name.
-
-    Return:
-      - list of room names from start to goal (inclusive) for one shortest path,
-      - [start] if start == goal,
-      - [] if no path exists.
     """
 
-    # TODO Steps 1–3: Restate the problem and choose a graph representation.
-    # TODO Steps 4–5: Plan a BFS that tracks parents and stops when goal is found.
-    # TODO Step 6: Implement BFS and path reconstruction.
-    # TODO Step 7: Test with small maps (lines, branches, isolated rooms).
-    # TODO Step 8: Confirm complexity is about O(n + m).
-    pass
+    # If no rooms, or rooms missing, or start/goal not real → no path
+    if start == goal:
+        return [start] if start in rooms else []
 
+    if start not in rooms or goal not in rooms:
+        return []
 
-if __name__ == "__main__":
-    # Optional manual test
-    rooms = ["Entrance", "Hall", "Gallery", "Cafe"]
-    doors = [("Entrance", "Hall"), ("Hall", "Gallery"), ("Gallery", "Cafe")]
-    print(shortest_path(rooms, doors, "Entrance", "Cafe"))
+    # Build adjacency list
+    graph = {r: [] for r in rooms}
+    for a, b in doors:
+        graph[a].append(b)
+        graph[b].append(a)
+
+    # BFS setup
+    queue = deque([start])
+    visited = {start}
+    parent = {start: None}
+
+    # BFS search
+    while queue:
+        curr = queue.popleft()
+
+        if curr == goal:
+            break
+
+        for neighbor in graph[curr]:
+            if neighbor not in visited:
+                visited.add(neighbor)
+                parent[neighbor] = curr
+                queue.append(neighbor)
+
+    # If goal never reached
+    if goal not in parent:
+        return []
+
+    # Reconstruct path backward
+    path = []
+    node = goal
+    while node is not None:
+        path.append(node)
+        node = parent[node]
+
+    # Reverse to get start → goal
+    path.reverse()
+    return path
